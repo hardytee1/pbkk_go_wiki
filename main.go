@@ -6,6 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"gorm.io/driver/mysql"
+  	"gorm.io/gorm"
+	"hardytee1.github.com/models"
+	"github.com/gin-gonic/gin"
 )
 
 type BlogPost struct {
@@ -44,8 +48,19 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/view/", viewHandler)
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8081", nil)
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 	}
+
+	dsn := "root:@tcp(127.0.0.1:3306)/pbkk_go?charset=utf8mb4&parseTime=True&loc=Local"
+  	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to db")
+	}
+
+	db.AutoMigrate(&models.Blog{})
+
+	r := gin.Default()
+	r.Run()
 }
